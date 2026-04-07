@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlotPulse - Pro Editor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pp-blue-light: #C2E1FD;
+            --pp-pink-light: #FFB6D3;
+            --pp-pink-vibrant: #FF6DA2;
+            --glass-bg: rgba(255, 255, 255, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            background: linear-gradient(180deg, var(--pp-pink-light) 0%, var(--pp-blue-light) 100%); 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            font-family: 'Happy Monkey', system-ui;
+        }
+
+        /* --- HEADER --- */
+        #editorHeader {
+            height: 65px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 15px; width: 100%; position: fixed; top: 0; left: 0; z-index: 1000;
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(15px);
+            transition: transform 0.3s ease;
+        }
+        
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .btn-icon { background: transparent; border: none; cursor: pointer; display: flex; padding: 5px; outline: none; }
+        .btn-icon img { width: 20px; height: 20px; opacity: 0.7; } 
+        .part-indicator { font-weight: 800; font-size: 0.9rem; color: #444; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        
+        #publishBtn { 
+            font-family: 'Happy Monkey', sans-serif; font-weight: 800; 
+            color: var(--pp-pink-vibrant); background: transparent; 
+            border: none; font-size: 0.85rem; letter-spacing: 1px;
+            opacity: 0.3; cursor: not-allowed; transition: 0.3s;
+        }
+        #publishBtn.active { opacity: 1; cursor: pointer; }
+
+        /* --- 1. SPARKLE OVERLAY (QUICK SAVE / FINISH) --- */
+        #sparkleOverlay {
+            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px); z-index: 9999; display: none;
+            align-items: center; justify-content: center; flex-direction: column;
+        }
+        .sparkle-icon { font-size: 60px; animation: pulseSparkle 1s infinite; }
+        @keyframes pulseSparkle {
+            0% { transform: scale(0.8); opacity: 0.5; filter: drop-shadow(0 0 5px #fff); }
+            50% { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 20px var(--pp-pink-vibrant)); }
+            100% { transform: scale(0.8); opacity: 0.5; filter: drop-shadow(0 0 5px #fff); }
+        }
+
+        /* --- 2. CUSTOM PLOT_PULSE MODALS --- */
+        .pp-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px);
+            display: none; align-items: center; justify-content: center; z-index: 3000;
+        }
+        .pp-modal-content {
+            background: rgba(255, 255, 255, 0.95); padding: 30px 20px; border-radius: 30px; 
+            width: 85%; max-width: 320px; text-align: center; border: 1px solid white;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+        .modal-title { color: var(--pp-pink-vibrant); margin-bottom: 20px; font-size: 1.2rem; font-weight: 800; }
+        .modal-btn { 
+            width: 100%; padding: 14px; border-radius: 20px; border: none; font-family: 'Happy Monkey';
+            font-weight: 800; cursor: pointer; margin-bottom: 10px; transition: 0.2s;
+        }
+        .btn-confirm { background: var(--pp-pink-vibrant); color: white; }
+        .btn-cancel { background: white; color: #999; border: 1px solid #eee; }
+
+        /* --- SCHEDULER SECTION --- */
+        #customScheduler { display: none; margin-top: 15px; padding: 20px 10px; border-radius: 20px; background: rgba(0, 0, 0, 0.03); border: 1px solid rgba(255, 255, 255, 0.8); animation: slideUp 0.3s ease; }
+        .picker-container { display: flex; justify-content: center; gap: 8px; margin: 15px 0; }
+        .picker-column { display: flex; flex-direction: column; align-items: flex-start; }
+        .picker-label { font-size: 0.6rem; color: #4E8BC4; margin-bottom: 4px; font-weight: 800; }
+        .pulse-input { background: white; border: 2px solid var(--pp-blue-light); border-radius: 12px; padding: 8px; width: 110px; font-family: 'Happy Monkey'; text-align: center; outline: none; }
+        .sched-actions { display: flex; justify-content: space-between; margin-top: 15px; }
+        .sched-btn { background: transparent; border: none; font-family: 'Happy Monkey'; font-size: 0.75rem; font-weight: 800; cursor: pointer; color: #999; }
+        .btn-set { color: var(--pp-pink-vibrant); }
+
+        /* --- BURGER MENU --- */
+        #burgerMenu { position: absolute; top: 60px; right: 15px; width: 150px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); border-radius: 15px; display: none; flex-direction: column; overflow: hidden; z-index: 2000; border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .menu-item { padding: 12px 20px; font-size: 0.85rem; color: #444; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; }
+
+        /* --- EDITOR AREA --- */
+        .editor-container { flex-grow: 1; overflow-y: auto; padding: 85px 20px 100px 20px; display: flex; flex-direction: column; gap: 15px; }
+        .title-field { font-family: 'Times New Roman', serif; font-size: 1.5rem; font-weight: bold; background: transparent; border: none; border-bottom: 2px solid rgba(255, 255, 255, 0.4); padding: 10px 0; color: #333; outline: none; text-align: center; }
+        .content-field { font-family: 'Times New Roman', serif; font-size: 1.1rem; line-height: 1.7; background: var(--glass-bg); backdrop-filter: blur(8px); border: none; border-radius: 20px; padding: 20px; color: #333; outline: none; flex-grow: 1; resize: none; min-height: 400px; }
+
+        .word-counter-pill { position: fixed; bottom: 20px; right: 20px; background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(10px); padding: 6px 12px; border-radius: 20px; font-size: 0.6rem; font-weight: 800; color: #555; border: 1px solid rgba(255,255,255,0.5); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .scrolled-down #editorHeader { transform: translateY(-100%); }
+    </style>
+</head>
+<body>
+
+    <header id="editorHeader">
+        <div class="header-left">
+            <button class="btn-icon" onclick="exitToDrafts()"><img src="https://cdn-icons-png.flaticon.com/512/93/93634.png"></button>
+            <span class="part-indicator">Part 1 of 1</span>
+        </div>
+        <div class="header-right">
+            <button id="publishBtn" disabled onclick="openModal('publishMainModal')">PUBLISH</button>
+            <button class="btn-icon" onclick="toggleMenu(event)"><img src="https://cdn-icons-png.flaticon.com/512/1828/1828859.png"></button>
+        </div>
+        <div id="burgerMenu">
+            <div class="menu-item" onclick="manualSave()">Save</div>
+            <div class="menu-item">Preview</div>
+            <div class="menu-item">History</div>
+            <div class="menu-item" onclick="openModal('deleteConfirmModal')">Delete</div>
+        </div>
+    </header>
+
+    <div id="sparkleOverlay">
+        <div class="sparkle-icon">✨</div>
+        <p id="sparkleText" style="color: var(--pp-pink-vibrant); font-weight: 800; margin-top: 10px; font-size: 0.85rem;">PULSING...</p>
+    </div>
+
+    <div id="deleteConfirmModal" class="pp-modal">
+        <div class="pp-modal-content">
+            <h3 class="modal-title">Discard this draft?</h3>
+            <button class="modal-btn btn-confirm" onclick="finalDelete()">YES, DISCARD</button>
+            <button class="modal-btn btn-cancel" onclick="closeAllModals()">KEEP WRITING</button>
+        </div>
+    </div>
+
+    <div id="publishMainModal" class="pp-modal" onclick="closeAllModals()">
+        <div class="pp-modal-content" onclick="event.stopPropagation()">
+            <h3 class="modal-title">Ready to Pulse?</h3>
+            <button class="modal-btn btn-confirm" onclick="finishAction('STORY IS LIVE')">PUBLISH NOW</button>
+            <button class="modal-btn btn-cancel" onclick="toggleScheduler()">PUBLISH LATER</button>
+            
+            <div id="customScheduler">
+                <p style="font-size: 0.75rem; color: #4E8BC4; font-weight: 800; margin-bottom: 10px;">SET DATE AND TIME</p>
+                <div class="picker-container">
+                    <div class="picker-column">
+                        <span class="picker-label">Date</span>
+                        <input type="date" id="dateSelect" class="pulse-input">
+                    </div>
+                    <div class="picker-column">
+                        <span class="picker-label">Time</span>
+                        <input type="time" id="timeSelect" class="pulse-input" style="width: 90px;">
+                    </div>
+                </div>
+                <div class="sched-actions">
+                    <button class="sched-btn" onclick="toggleScheduler()">CLEAR</button>
+                    <button class="sched-btn btn-set" onclick="finishAction('PULSE SCHEDULED')">SET THE PULSE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor-container" id="scrollArea">
+        <input type="text" id="titleField" class="title-field" placeholder="Title your Story Part">
+        <textarea id="bodyField" class="content-field" placeholder="Tap here to start writing..."></textarea>
+    </div>
+
+    <div class="word-counter-pill">Words: <span id="wCount">0</span></div>
+
+    <script>
+        const title = document.getElementById('titleField');
+        const body = document.getElementById('bodyField');
+        const overlay = document.getElementById('sparkleOverlay');
+        const sText = document.getElementById('sparkleText');
+        const scheduler = document.getElementById('customScheduler');
+
+        function showSparkleEffect(text, callback) {
+            sText.innerText = text || "SAVING...";
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                if(callback) callback();
+            }, 1200);
+        }
+
+        function finishAction(msg) {
+            closeAllModals();
+            showSparkleEffect(msg, () => {
+                // If it's a real publish, you'd redirect here
+                window.location.href = 'post.html'; 
+            });
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeAllModals() { 
+            document.querySelectorAll('.pp-modal').forEach(m => m.style.display = 'none');
+            scheduler.style.display = 'none';
+        }
+
+        function toggleScheduler() {
+            scheduler.style.display = (scheduler.style.display === 'block') ? 'none' : 'block';
+        }
+
+        function manualSave() {
+            document.getElementById('burgerMenu').style.display = 'none';
+            showSparkleEffect("DRAFT SAVED");
+        }
+
+        function finalDelete() {
+            localStorage.clear();
+            window.location.href = 'post.html';
+        }
+
+        function validate() {
+            const clean = body.value.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ").trim();
+            const words = clean ? clean.split(/\s+/).length : 0;
+            document.getElementById('wCount').innerText = words;
+            
+            const btn = document.getElementById('publishBtn');
+            btn.className = (title.value.trim() && words >= 10) ? 'active' : '';
+            btn.disabled = !(title.value.trim() && words >= 10);
+
+            localStorage.setItem('story_draft_title', title.value);
+            localStorage.setItem('story_draft_content', body.value);
+        }
+
+        function exitToDrafts() {
+            showSparkleEffect("SAVING PROGRESS", () => {
+                window.location.href = 'edit-pulse.html';
+            });
+        }
+
+        function toggleMenu(e) { e.stopPropagation(); const m = document.getElementById('burgerMenu'); m.style.display = (m.style.display==='flex')?'none':'flex'; }
+        window.onclick = () => document.getElementById('burgerMenu').style.display = 'none';
+        
+        title.oninput = validate;
+        body.oninput = validate;
+
+        window.onload = () => {
+            title.value = localStorage.getItem('story_draft_title') || '';
+            body.value = localStorage.getItem('story_draft_content') || '';
+            document.getElementById('dateSelect').value = new Date().toISOString().split('T')[0];
+            validate();
+        };
+    </script>
+</body>
+</html>

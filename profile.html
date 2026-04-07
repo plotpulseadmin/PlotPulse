@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlotPulse Profile - History Fixed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --lavender-bg: #C2E1FD;
+            --cream-card: #FFFDF8;
+            --blue-dark: #4E8BC4;
+            --pink-vibrant: #FF6DA2;
+            --nav-grey: #BDBDBD;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background: var(--lavender-bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .page-content { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 0 20px 120px; 
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        /* --- HEADER --- */
+        .profile-header-structure { 
+            background: var(--pink-vibrant); border-radius: 20px; 
+            padding: 20px; margin-top: 30px; margin-bottom: 25px;
+            display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center;
+            position: relative;
+        }
+        .avatar-frame { 
+            width: 110px; height: 110px; border-radius: 50%; border: 4px solid white; 
+            overflow: hidden; background: white; position: absolute; top: -20px; left: 15px; z-index: 10;
+        }
+        .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
+        .id-stack { grid-column: 2 / 3; display: flex; flex-direction: column; text-align: right; }
+        .user-handle { font-size: 2.8rem; font-weight: 800; color: white; line-height: 0.9; margin-bottom: 5px; }
+        .user-name { font-size: 1rem; font-weight: 700; color: var(--blue-dark); text-transform: uppercase; }
+
+        /* --- UI CARDS --- */
+        .info-box { background: var(--cream-card); border-radius: 20px; padding: 20px; border: 2px dashed rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .box-label-main { font-size: 0.8rem; font-weight: 800; color: var(--blue-dark); text-transform: uppercase; margin-bottom: 12px; }
+
+        /* --- TOP LAYOUT --- */
+        .top-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 15px; }
+        .about-text { width: 100%; height: 260px; border: none; background: transparent; font-size: 0.7rem; line-height: 1.5; color: #666; resize: none; }
+        
+        /* --- RIGHT COLUMN (Socials + History Stack) --- */
+        .social-link { 
+            background: white; padding: 10px; border-radius: 12px; 
+            display: flex; align-items: center; gap: 10px; text-decoration: none;
+            border: 1px solid #f0f0f0; font-size: 0.65rem; font-weight: 700; color: var(--blue-dark);
+            margin-bottom: 8px;
+        }
+        .social-icon { width: 18px; }
+
+        /* THE HISTORY STACKED BOOKS (Correct Placement) */
+        .history-books-stack {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column-reverse; /* Oldest at bottom, Newest at top */
+            align-items: center;
+            gap: 2px;
+        }
+        .history-spine {
+            width: 100%;
+            height: 18px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.5rem;
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+        }
+
+        /* --- MAIN SHELF SECTION --- */
+        .scrollable-shelf-container {
+            max-height: 350px; 
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .series-row { margin-bottom: 15px; }
+        .series-title { font-size: 0.65rem; font-weight: 800; color: var(--pink-vibrant); text-transform: uppercase; margin-bottom: 6px; }
+        .shelf { display: flex; overflow-x: auto; gap: 3px; padding-bottom: 8px; border-bottom: 5px solid #D2B48C; }
+        .book-spine { min-width: 20px; height: 65px; border-radius: 2px; }
+
+        /* --- THREAD FEED --- */
+        .thread-feed { background: var(--cream-card); border-radius: 20px; padding: 20px; border: 2px dashed rgba(0,0,0,0.05); }
+        .comment-display { max-height: 150px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .comment-bubble { background: #f0f7ff; padding: 10px; border-radius: 12px; font-size: 0.7rem; }
+        .comment-bubble b { color: var(--pink-vibrant); font-size: 0.6rem; display: block; }
+        
+        .realtime-input-wrap { display: flex; align-items: center; gap: 10px; border-top: 1px solid #eee; padding-top: 12px; }
+        .chat-icon { width: 22px; height: 22px; }
+        .realtime-input { flex: 1; border: none; background: #f5f5f5; border-radius: 20px; padding: 10px 15px; font-size: 0.7rem; }
+
+        /* --- NAVIGATION --- */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 100px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-radius: 40px 40px 0 0; z-index: 9999; padding-bottom: 20px; }
+        .nav-link { text-decoration: none; color: var(--nav-grey); font-size: 0.6rem; display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; }
+        .nav-icon { width: 28px; height: 28px; opacity: 0.3; }
+        .nav-link.active { color: var(--pink-vibrant); font-weight: 800; }
+        .nav-link.active .nav-icon { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="page-content">
+        <header class="profile-header-structure">
+            <div class="avatar-frame"><img src="https://picsum.photos/seed/yoing/300/300"></div>
+            <div class="id-stack">
+                <h2 class="user-handle">yoing</h2>
+                <div class="user-name">Quach Tieu Bang</div>
+            </div>
+        </header>
+
+        <div class="top-grid">
+            <div class="info-box">
+                <h3 class="box-label-main">About Me</h3>
+                <textarea class="about-text" readonly>I'm a passionate graphic designer and illustrator. This is my PlotPulse journey.</textarea>
+            </div>
+
+            <div class="info-box">
+                <h3 class="box-label-main">Follow Me</h3>
+                <a href="#" class="social-link"><img src="https://cdn-icons-png.flaticon.com/512/1384/1384031.png" class="social-icon"> Instagram</a>
+                <a href="#" class="social-link"><img src="https://cdn-icons-png.flaticon.com/512/12105/12105336.png" class="social-icon"> Threads</a>
+                
+                <div class="history-books-stack" id="historyStack">
+                    <h4 class="box-label-main" style="font-size: 0.55rem; margin-top: 10px;">History Stack</h4>
+                    </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3 class="box-label-main">My Series Shelf</h3>
+            <div class="scrollable-shelf-container">
+                <div class="series-row"><div class="series-title">Celestial Path</div><div class="shelf" id="s1"></div></div>
+                <div class="series-row"><div class="series-title">Omega Protocol</div><div class="shelf" id="s2"></div></div>
+                <div class="series-row"><div class="series-title">Neon Pulse</div><div class="shelf" id="s3"></div></div>
+                <div class="series-row"><div class="series-title">Final Echo</div><div class="shelf" id="s4"></div></div>
+            </div>
+        </div>
+
+        <div class="thread-feed">
+            <h3 class="box-label-main">Thread Feed</h3>
+            <div class="comment-display" id="commentBox">
+                <div class="comment-bubble"><b>reader_x</b> Can't wait for the next update!</div>
+            </div>
+            <div class="realtime-input-wrap">
+                <img src="https://cdn-icons-png.flaticon.com/512/1947/1947247.png" class="chat-icon">
+                <input type="text" id="commentInput" class="realtime-input" placeholder="Say something..." onkeypress="addComment(event)">
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="#" class="nav-link"><img src="https://cdn-icons-png.flaticon.com/512/19024/19024959.png" class="nav-icon"><span>Home</span></a>
+        <a href="#" class="nav-link"><img src="https://cdn-icons-png.flaticon.com/512/1164/1164620.png" class="nav-icon"><span>Library</span></a>
+        <a href="#" class="nav-link"><img src="https://cdn-icons-png.flaticon.com/512/5836/5836915.png" class="nav-icon"><span>Post</span></a>
+        <a href="#" class="nav-link active"><img src="https://cdn-icons-png.flaticon.com/512/10156/10156084.png" class="nav-icon"><span>Profile</span></a>
+    </nav>
+
+    <script>
+        const colors = ['#4E8BC4', '#FF6DA2', '#5A9BD5', '#FF99BE'];
+        
+        // Fill History Stack (Vertical)
+        const hist = document.getElementById('historyStack');
+        ['Oldest', 'Update 1', 'Update 2', 'Latest'].forEach((text, i) => {
+            const b = document.createElement('div');
+            b.className = 'history-spine';
+            b.style.background = colors[i % 4];
+            b.innerText = text;
+            hist.appendChild(b);
+        });
+
+        // Fill Main Shelves
+        for (let i = 1; i <= 4; i++) {
+            const s = document.getElementById('s' + i);
+            for (let b = 1; b <= 10; b++) {
+                s.innerHTML += `<div class="book-spine" style="background:${colors[(i+b)%4]}"></div>`;
+            }
+        }
+
+        // Real-time Commenting
+        function addComment(e) {
+            if (e.key === 'Enter' && e.target.value.trim() !== "") {
+                const box = document.getElementById('commentBox');
+                box.innerHTML += `<div class="comment-bubble"><b>Guest</b> ${e.target.value}</div>`;
+                e.target.value = "";
+                box.scrollTop = box.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>

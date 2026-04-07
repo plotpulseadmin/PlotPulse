@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlotPulse - Story Studio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Happy+Monkey&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pp-blue-light: #C2E1FD;
+            --pp-pink-light: #FFB6D3;
+            --pp-pink-vibrant: #FF6DA2;
+            --pp-blue-dark: #4E8BC4;
+            --glass-bg: rgba(255, 255, 255, 0.4);
+            --confirm-bg: #2B2B2B; 
+            --confirm-txt: #FFFFFF;
+            --confirm-txt-sec: #AAAAAA;
+            --confirm-action: #E05656;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            background: linear-gradient(180deg, var(--pp-pink-light) 0%, var(--pp-blue-light) 100%); 
+            min-height: 100vh; font-family: 'Happy Monkey', system-ui;
+            padding: 20px; color: #444;
+        }
+
+        header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px; }
+        .btn-icon { background: transparent; border: none; cursor: pointer; padding: 5px; display: flex; align-items: center; }
+        .btn-icon img { width: 22px; height: 22px; opacity: 0.7; }
+        .page-title { font-size: 1.1rem; font-weight: 800; color: #333; }
+
+        /* --- COVER SECTION --- */
+        .cover-section {
+            display: flex; align-items: center; gap: 20px; margin-bottom: 30px;
+            background: var(--glass-bg); padding: 15px; border-radius: 25px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5);
+        }
+        .cover-wrapper {
+            position: relative; width: 80px; height: 110px; border-radius: 15px;
+            overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: url('https://via.placeholder.com/150'); 
+            background-size: cover; background-position: center;
+        }
+        .cover-default-blur {
+            width: 100%; height: 100%; backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* --- FORM ELEMENTS --- */
+        .form-group { margin-bottom: 20px; position: relative; }
+        .label { 
+            display: block; font-size: 0.7rem; font-weight: 800; 
+            color: var(--pp-blue-dark); margin-bottom: 8px; margin-left: 10px;
+            text-transform: uppercase;
+        }
+        .pp-input, .pp-textarea, .pp-select-trigger {
+            width: 100%; background: var(--glass-bg); backdrop-filter: blur(8px);
+            border: 2px solid transparent; border-radius: 20px;
+            padding: 15px 20px; font-family: 'Happy Monkey'; font-size: 0.9rem;
+            color: #333; outline: none; transition: 0.3s;
+        }
+        .pp-textarea { min-height: 120px; resize: none; border-radius: 25px; line-height: 1.4; }
+
+        /* --- DROPDOWNS --- */
+        .pp-select-trigger { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .custom-dropdown {
+            position: absolute; width: 100%; background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(15px); border-radius: 20px;
+            top: 100%; z-index: 100; display: none; margin-top: 8px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); max-height: 250px; 
+            overflow-y: auto; border: 1px solid rgba(255,255,255,0.6);
+        }
+        .dropdown-item { 
+            padding: 14px 20px; font-size: 0.8rem; cursor: pointer; 
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .dropdown-item:active { background: var(--pp-blue-light); }
+        .dropdown-item .text-content { flex: 1; }
+        .dropdown-item .desc { display: block; font-size: 0.65rem; color: #888; font-weight: normal; margin-top: 2px; }
+        .dropdown-item .check-icon { width: 16px; display: none; filter: invert(53%) sepia(85%) saturate(1510%) hue-rotate(308deg) brightness(101%) contrast(101%); }
+        .dropdown-item.selected .check-icon { display: block; }
+        .dropdown-item.danger { color: var(--confirm-action); font-weight: 800; }
+
+        /* --- TAGS SYSTEM --- */
+        .suggestions-box {
+            position: absolute; width: 100%; background: white; border-radius: 15px;
+            top: 100%; left: 0; z-index: 10; display: none; margin-top: 5px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden;
+        }
+        .suggest-item { padding: 12px 20px; font-size: 0.8rem; cursor: pointer; border-bottom: 1px solid #f0f0f0; }
+        .tags-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .tag-pill { background: var(--pp-pink-vibrant); color: white; padding: 6px 14px; border-radius: 15px; font-size: 0.7rem; font-weight: 800; }
+
+        /* --- TOC & PARTS --- */
+        .toc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 5px; position: relative; }
+        .settings-icon { width: 22px; opacity: 0.6; cursor: pointer; }
+
+        .add-part-box {
+            background: var(--glass-bg); border: 2px dashed var(--pp-blue-dark);
+            border-radius: 25px; padding: 25px; text-align: center;
+            cursor: pointer; margin-bottom: 20px;
+        }
+        .add-part-box img { width: 35px; margin-bottom: 8px; opacity: 0.8; }
+        .add-part-box span { display: block; font-weight: 800; color: var(--pp-blue-dark); font-size: 0.9rem; }
+
+        .parts-list { display: flex; flex-direction: column; gap: 15px; }
+        .part-item {
+            background: var(--glass-bg); padding: 20px; border-radius: 25px;
+            backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.3);
+        }
+        .part-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+        .part-title { font-weight: 800; font-size: 1rem; color: #333; }
+        .part-preview { font-size: 0.8rem; color: #666; line-height: 1.4; margin-bottom: 10px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        
+        .part-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
+        .part-stats { display: flex; gap: 12px; align-items: center; }
+        .stat-unit { display: flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 800; color: #888; }
+        .stat-unit img { width: 14px; opacity: 0.5; }
+        
+        .part-info-text { font-size: 0.7rem; font-weight: 800; color: #999; }
+        .status-tag { font-size: 0.65rem; padding: 4px 10px; border-radius: 10px; font-weight: 800; text-transform: uppercase; }
+        .tag-published { background: #E1F9EB; color: #27AE60; }
+        .tag-draft { background: #F5F5F5; color: #888; }
+
+        /* --- MODALS --- */
+        .confirm-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px;
+        }
+        .confirm-overlay.active { display: flex; }
+        .confirm-modal { background: var(--confirm-bg); width: 100%; max-width: 400px; border-radius: 20px; padding: 25px; }
+        .confirm-title { color: white; margin-bottom: 15px; font-size: 1.1rem; font-weight: 800; }
+        .confirm-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid #444; color: white; padding: 10px 0; margin-bottom: 20px; outline: none; font-family: 'Happy Monkey'; }
+        
+        .btn-save-main {
+            width: 100%; background: var(--pp-pink-vibrant); color: white; border: none;
+            padding: 18px; border-radius: 30px; font-family: 'Happy Monkey';
+            font-weight: 800; font-size: 1rem; margin-top: 30px;
+            box-shadow: 0 10px 25px rgba(255, 109, 162, 0.4); cursor: pointer;
+        }
+
+        .switch-btn { background: transparent; border: none; cursor: pointer; }
+        .switch-btn img { width: 45px; }
+
+        #sparkleOverlay {
+            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px); z-index: 9999; display: none;
+            align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button class="btn-icon" onclick="history.back()"><img src="https://cdn-icons-png.flaticon.com/512/93/93634.png"></button>
+        <span class="page-title">Story Studio</span>
+        <div style="width:32px;"></div>
+    </header>
+
+    <div class="cover-section">
+        <div class="cover-wrapper"><div class="cover-default-blur"><img src="https://cdn-icons-png.flaticon.com/512/10054/10054243.png" style="width:24px; filter:invert(1);"></div></div>
+        <div><p style="font-size: 0.85rem; font-weight: 800; color: var(--pp-pink-vibrant); cursor: pointer;">Add Story Cover</p></div>
+    </div>
+
+    <div class="form-group"><label class="label">Story Title</label><input type="text" class="pp-input" placeholder="Enter title..."></div>
+    <div class="form-group"><label class="label">Story Description</label><textarea class="pp-textarea" placeholder="Write your blurb..."></textarea></div>
+
+    <div class="form-group" id="tagGroup">
+        <label class="label">Tags</label>
+        <input type="text" class="pp-input" id="tagInput" placeholder="Type to add tags..." oninput="showTagSuggestions()">
+        <div class="suggestions-box" id="tagSuggestions">
+            <div class="suggest-item" onclick="addTag('Action')">Action</div>
+            <div class="suggest-item" onclick="addTag('Fantasy')">Fantasy</div>
+            <div class="suggest-item" onclick="addTag('Romance')">Romance</div>
+        </div>
+        <div class="tags-container" id="tagsList"></div>
+    </div>
+
+    <div class="form-group">
+        <label class="label">Genre</label>
+        <div class="pp-select-trigger" onclick="toggleDropdown('genreList')"><span id="txtGenre">Select a Genre...</span><span>▼</span></div>
+        <div class="custom-dropdown" id="genreList"></div>
+    </div>
+
+    <div class="form-group">
+        <label class="label">Copyright License</label>
+        <div class="pp-select-trigger" onclick="toggleDropdown('copyList')"><span id="txtCopy">Select a Copyright...</span><span>▼</span></div>
+        <div class="custom-dropdown" id="copyList"></div>
+    </div>
+
+    <div style="background: var(--glass-bg); padding: 20px; border-radius: 25px; margin-bottom: 25px;">
+        <div class="form-group">
+            <label class="label">Language</label>
+            <div class="pp-select-trigger" style="background:white;" onclick="toggleDropdown('langList')"><span id="txtLang">Select a Language...</span><span>▼</span></div>
+            <div class="custom-dropdown" id="langList"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <span style="font-weight:800; font-size:0.9rem;">Story Completed</span>
+            <button class="switch-btn" onclick="toggleToggle(this)"><img src="https://cdn-icons-png.flaticon.com/512/503/503863.png" data-state="off"></button>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-weight:800; font-size:0.9rem;">Mature Content (18+)</span>
+            <button class="switch-btn" onclick="toggleToggle(this)"><img src="https://cdn-icons-png.flaticon.com/512/503/503863.png" data-state="off"></button>
+        </div>
+    </div>
+
+    <hr style="border:none; height:1px; background:rgba(255,255,255,0.5); margin:30px 0;">
+
+    <div class="toc-header">
+        <label class="label">Table of Contents</label>
+        <img src="https://cdn-icons-png.flaticon.com/512/16327/16327901.png" class="settings-icon" onclick="toggleDropdown('settingsMenu')">
+        
+        <div class="custom-dropdown" id="settingsMenu" style="width: 180px; right: 0; left: auto; top: 30px;">
+            <div class="dropdown-item" onclick="openUnpublish()"><div class="text-content">Unpublish Story</div><img src="https://cdn-icons-png.flaticon.com/512/2767/2767140.png" class="check-icon"></div>
+            <div class="dropdown-item danger" onclick="openDelete()"><div class="text-content">Delete Story</div><img src="https://cdn-icons-png.flaticon.com/512/2767/2767140.png" class="check-icon"></div>
+        </div>
+    </div>
+
+    <div class="add-part-box">
+        <img src="https://cdn-icons-png.flaticon.com/512/7588/7588946.png">
+        <span>Add New Part</span>
+    </div>
+
+    <div class="parts-list">
+        <div class="part-item">
+            <div class="part-top">
+                <span class="part-title">The First Spark</span>
+                <span class="status-tag tag-published">Published</span>
+            </div>
+            <p class="part-preview">In a world where light was a currency, she was born into the deepest shadows...</p>
+            <div class="part-footer">
+                <div class="part-stats">
+                    <div class="stat-unit"><img src="https://cdn-icons-png.flaticon.com/512/709/709612.png"> 1.2k</div>
+                    <div class="stat-unit"><img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png"> 450</div>
+                    <div class="stat-unit"><img src="https://cdn-icons-png.flaticon.com/512/1380/1380338.png"> 82</div>
+                </div>
+                <span class="part-info-text">Apr 07, 2026</span>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-save-main" onclick="saveAll()">SAVE ALL CHANGES</button>
+
+    <div id="unpublishModal" class="confirm-overlay">
+        <div class="confirm-modal">
+            <h3 class="confirm-title">Are you sure?</h3>
+            <p style="color:#aaa; font-size:0.85rem; margin-bottom:25px; line-height:1.4;">Unpublishing will hide the story from readers, but your parts will be saved as drafts.</p>
+            <div style="display:flex; justify-content:flex-end; gap:30px;">
+                <button style="color:#888; background:none; border:none; font-weight:800; font-family:'Happy Monkey';" onclick="closeModals()">NO</button>
+                <button style="color:var(--pp-pink-vibrant); background:none; border:none; font-weight:800; font-family:'Happy Monkey';" onclick="executeUnpublish()">YES</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="confirm-overlay">
+        <div class="confirm-modal">
+            <h3 class="confirm-title">Warning: This cannot be undone.</h3>
+            <p style="color:#aaa; font-size:0.8rem; margin-bottom:15px; line-height:1.4;">Note: Deleting the last part will delete the story.</p>
+            <ul style="color:#aaa; font-size:0.75rem; margin-bottom:20px; margin-left:15px;">
+                <li>All reads for this story will be deleted</li>
+                <li>All votes for this story will be deleted</li>
+                <li>All comments for this story will be deleted</li>
+            </ul>
+            <p style="color:#aaa; font-size:0.8rem; margin-bottom:10px;">Please enter your username to confirm</p>
+            <input type="text" id="delInput" class="confirm-input" placeholder="Enter username...">
+            <div style="display:flex; justify-content:flex-end; gap:20px;">
+                <button style="color:#888; background:none; border:none; font-weight:800; font-family:'Happy Monkey';" onclick="closeModals()">CANCEL</button>
+                <button style="color:var(--confirm-action); background:none; border:none; font-weight:800; font-family:'Happy Monkey';" onclick="executeDelete()">DELETE STORY</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sparkleOverlay"><p style="color: var(--pp-pink-vibrant); font-weight: 800;">SAVING...</p></div>
+
+    <script>
+        const genres = ["Action", "Adventure", "Chicklit", "Comedy", "Drama", "Fanfiction", "Fantasy", "General Fiction", "Historical Fiction", "Horror", "Mystery", "Non-Fiction", "Paranormal", "Poetry", "Random", "Romance", "Sci-Fi", "Short Story", "Spiritual", "Teen Fiction", "Thriller", "Vampire", "Werewolf","Young Adult"].sort();
+        const languages = ["Arabic", "Amharic", "Azerbaijani", "Bengali", "Belarusian", "Bhojpuri", "Burmese", "Cantonese", "Chinese", "Czech", "Dutch", "English", "Farsi", "French", "German", "Greek", "Gujarati", "Hausa", "Hindi", "Hungarian", "Italian", "Japanese", "Javanese", "Kannada", "Korean", "Malay", "Maithili", "Marathi", "Nigerian Pidgin", "Oriya", "Polish", "Portuguese", "Punjabi", "Romanian", "Russian", "Spanish", "Sundanese", "Swahili", "Swedish", "Tagalog", "Tamil", "Telugu", "Thai", "Turkish", "Ukrainian", "Uzbek", "Yoruba"].sort();
+        
+        // Copyright with specific definitions
+        const copyrights = [
+            { name: "All Rights Reserved", desc: "You own the story and others cannot use it." },
+            { name: "CC Attribution (CC BY)", desc: "Allows others to distribute, remix, and build upon your work as long as they credit you." },
+            { name: "CC BY-NC", desc: "Allows remixing/building non-commercially with credit to you." },
+            { name: "CC BY-NC-ND", desc: "Others can download and share with credit, but can't change or use commercially." },
+            { name: "CC BY-NC-SA", desc: "Others can remix with credit non-commercially if they license new works under identical terms." },
+            { name: "CC BY-ND", desc: "Others can reuse for any purpose, including commercially, but cannot share in adapted form." },
+            { name: "CC BY-SA", desc: "Others can remix/build upon work even commercially as long as they credit you and license under identical terms." },
+            { name: "Public Domain", desc: "The work is free of copyright and anyone can use it for anything." },
+            { name: "Fair Use", desc: "Allows limited use of copyrighted material without permission for purposes like criticism or news." }
+        ];
+
+        function populate(id, items, targetId, isCopyright = false) {
+            const list = document.getElementById(id);
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                
+                const itemName = isCopyright ? item.name : item;
+                const itemDesc = isCopyright ? `<span class="desc">${item.desc}</span>` : "";
+                
+                div.innerHTML = `<div class="text-content">${itemName}${itemDesc}</div><img src="https://cdn-icons-png.flaticon.com/512/2767/2767140.png" class="check-icon">`;
+                
+                div.onclick = () => {
+                    document.getElementById(targetId).innerText = itemName;
+                    document.getElementById(targetId).style.color = "var(--pp-pink-vibrant)";
+                    
+                    // Toggle selections
+                    Array.from(list.children).forEach(child => child.classList.remove('selected'));
+                    div.classList.add('selected');
+                    list.style.display = 'none';
+                };
+                list.appendChild(div);
+            });
+        }
+
+        // Initialize lists
+        populate('genreList', genres, 'txtGenre');
+        populate('langList', languages, 'txtLang');
+        populate('copyList', copyrights, 'txtCopy', true);
+
+        function toggleDropdown(id) {
+            const el = document.getElementById(id);
+            const isVisible = el.style.display === 'block';
+            document.querySelectorAll('.custom-dropdown').forEach(d => {
+                if(d.id !== id) d.style.display = 'none';
+            });
+            el.style.display = isVisible ? 'none' : 'block';
+        }
+
+        function toggleToggle(btn) {
+            const img = btn.querySelector('img');
+            const isOn = img.getAttribute('data-state') === 'on';
+            img.src = isOn ? "https://cdn-icons-png.flaticon.com/512/503/503863.png" : "https://cdn-icons-png.flaticon.com/512/503/503859.png";
+            img.setAttribute('data-state', isOn ? 'off' : 'on');
+        }
+
+        function addTag(val) {
+            const pill = document.createElement('div'); pill.className = 'tag-pill'; pill.innerText = val;
+            document.getElementById('tagsList').appendChild(pill);
+            document.getElementById('tagInput').value = "";
+            document.getElementById('tagSuggestions').style.display = 'none';
+        }
+
+        function showTagSuggestions() { document.getElementById('tagSuggestions').style.display = 'block'; }
+
+        // Modal Controls
+        function openUnpublish() { 
+            document.getElementById('settingsMenu').style.display = 'none';
+            document.getElementById('unpublishModal').classList.add('active'); 
+        }
+        function openDelete() { 
+            document.getElementById('settingsMenu').style.display = 'none';
+            document.getElementById('deleteModal').classList.add('active'); 
+        }
+        function closeModals() { 
+            document.querySelectorAll('.confirm-overlay').forEach(m => m.classList.remove('active')); 
+        }
+
+        function executeUnpublish() {
+            closeModals();
+            alert("Story Unpublished");
+        }
+
+        function executeDelete() {
+            const input = document.getElementById('delInput').value;
+            if(input.trim() !== "") {
+                closeModals();
+                alert("Story permanently deleted.");
+                location.reload();
+            }
+        }
+
+        function saveAll() {
+            document.getElementById('sparkleOverlay').style.display = 'flex';
+            setTimeout(() => { location.reload(); }, 1200);
+        }
+
+        window.onclick = (e) => {
+            if (!e.target.closest('.form-group') && !e.target.closest('.pp-select-trigger') && !e.target.closest('.settings-icon')) {
+                document.querySelectorAll('.custom-dropdown').forEach(d => d.style.display = 'none');
+            }
+        };
+    </script>
+</body>
+</html>

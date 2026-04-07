@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlotPulse - Silent Archive Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Happy+Monkey&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-dark: #4E8BC4;
+            --pink-vibrant: #FF6DA2;
+            --glass: rgba(255, 255, 255, 0.98);
+            --bg-gradient: linear-gradient(180deg, #FF99BE 0%, #C2E1FD 100%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background: var(--bg-gradient); background-attachment: fixed; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        .lib-header { padding: 40px 25px 10px; flex-shrink: 0; }
+        .lib-title { font-family: 'Happy Monkey', cursive; color: var(--blue-dark); font-size: 1.8rem; text-transform: uppercase; }
+        
+        .lib-tabs { display: flex; gap: 20px; padding: 0 25px 25px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+        .tab { font-size: 0.85rem; font-weight: 600; color: rgba(78, 139, 196, 0.7); padding-bottom: 5px; cursor: pointer; white-space: nowrap; transition: 0.3s; }
+        .tab.active { color: var(--blue-dark); border-bottom: 3px solid var(--pink-vibrant); }
+
+        .view-content { flex-grow: 1; overflow-y: auto; padding-bottom: 110px; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+        .hidden { display: none !important; }
+
+        /* --- READING GRID --- */
+        .library-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 25px 15px; padding: 20px; }
+        .book-item { display: flex; flex-direction: column; align-items: center; position: relative; }
+        .cover-wrapper { position: relative; width: 100%; aspect-ratio: 2/3; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.1); z-index: 1; }
+        .lib-cover { width: 100%; height: 100%; background-size: cover; background-position: center; pointer-events: none; }
+        .book-label { font-size: 0.6rem; font-weight: 600; color: var(--blue-dark); margin-top: 8px; text-align: center; width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* --- LONG PRESS MENU --- */
+        .menu-reading {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 100%;
+            background: var(--glass); display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; pointer-events: none; transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s;
+        }
+        .menu-reading.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+        .blind-opt { background: none; border: none; color: var(--blue-dark); font-weight: 800; font-size: 0.55rem; text-transform: uppercase; padding: 12px; width: 100%; cursor: pointer; }
+        .blind-opt:active { background: rgba(78, 139, 196, 0.1); color: var(--pink-vibrant); }
+        .blind-opt.cancel { color: var(--pink-vibrant); border-top: 1px solid #eee; margin-top: 5px; font-size: 0.5rem; }
+
+        /* --- ARCHIVE VIEW --- */
+        #archive-view { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 40px; }
+        #stack-container { display: flex; flex-direction: column-reverse; align-items: center; width: 100%; }
+        .stack-spine { width: 280px; height: 42px; border-radius: 4px; margin-bottom: -4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; padding: 0 15px; color: white; font-weight: 800; font-size: 0.7rem; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.1); animation: slideUp 0.4s ease-out; }
+        .archive-table-base { width: 340px; height: 15px; background: #fff; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-top: 5px; }
+
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* --- MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); z-index: 10000; display: none; justify-content: center; align-items: center; padding: 25px; }
+        .book-card { background: white; border-radius: 25px; width: 100%; max-width: 400px; display: flex; padding: 20px; gap: 15px; }
+        .card-left { width: 35%; }
+        .card-left img { width: 100%; border-radius: 12px; }
+
+        /* --- NAV --- */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 90px; background: #fff; display: flex; justify-content: space-around; align-items: center; border-radius: 30px 30px 0 0; z-index: 9000; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); }
+        .nav-link { text-decoration: none; color: #ccc; font-size: 0.65rem; text-align: center; flex: 1; }
+        .nav-icon { width: 24px; opacity: 0.3; display: block; margin: 0 auto 5px; }
+        .nav-link.active { color: var(--pink-vibrant); font-weight: 700; }
+        .nav-link.active .nav-icon { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="lib-header"><h1 class="lib-title">My Collection</h1></div>
+
+    <div class="lib-tabs">
+        <div class="tab active" onclick="showTab('reading', this)">Reading</div>
+        <div class="tab" onclick="showTab('archive', this)">Archive</div>
+        <div class="tab" onclick="showTab('bookmarks', this)">Bookmarks</div>
+        <div class="tab" onclick="showTab('offline', this)">Offline</div>
+    </div>
+
+    <div class="view-content" id="mainScroll">
+        <div id="reading-view" class="library-grid"></div>
+        
+        <div id="archive-view" class="hidden">
+            <div id="stack-container"></div>
+            <div class="archive-table-base"></div>
+        </div>
+
+        <div id="bookmarks-view" class="hidden" style="padding: 40px; text-align: center; color: var(--blue-dark); opacity: 0.5;">Empty snippets.</div>
+        <div id="offline-view" class="hidden" style="padding: 40px; text-align: center; color: var(--blue-dark); opacity: 0.5;">No offline files.</div>
+    </div>
+
+    <div class="modal-overlay" id="infoModal" onclick="this.style.display='none'">
+        <div class="book-card" onclick="event.stopPropagation()">
+            <div class="card-left"><img id="m-img" src=""></div>
+            <div class="card-right">
+                <div id="m-title" style="font-weight: 800; font-size: 0.95rem; color: var(--blue-dark);">Title</div>
+                <div style="font-size: 0.7rem; color: var(--pink-vibrant); font-weight: 600; margin-top: 5px;">Volume Info</div>
+                <p style="font-size: 0.65rem; color: #777; margin-top: 10px; line-height: 1.4;">Story data and metadata retrieved successfully.</p>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-link"><img src="https://cdn-icons-png.flaticon.com/512/9314/9314393.png" class="nav-icon">Home</div>
+        <div class="nav-link active"><img src="https://cdn-icons-png.flaticon.com/512/1164/1164620.png" class="nav-icon">Library</div>
+        <div class="nav-link"><img src="https://cdn-icons-png.flaticon.com/512/5836/5836915.png" class="nav-icon">Post</div>
+        <div class="nav-link"><img src="https://cdn-icons-png.flaticon.com/512/10156/10156084.png" class="nav-icon">Alerts</div>
+    </nav>
+
+    <script>
+        // --- DATA STATE ---
+        let readingBooks = [
+            { id: 1, title: "Celestial Path", img: "https://picsum.photos/seed/b1/400/600" },
+            { id: 2, title: "Omega Protocol", img: "https://picsum.photos/seed/b2/400/600" },
+            { id: 3, title: "Silent Echo", img: "https://picsum.photos/seed/b3/400/600" },
+            { id: 4, title: "Neon Pulse", img: "https://picsum.photos/seed/b4/400/600" },
+            { id: 5, title: "The Last Gate", img: "https://picsum.photos/seed/b5/400/600" },
+            { id: 6, title: "Dark Matter", img: "https://picsum.photos/seed/b6/400/600" }
+        ];
+
+        let archivedBooks = [];
+
+        // --- GESTURE LOGIC ---
+        let pressTimer;
+        let isLongPress = false;
+        let startY = 0, startX = 0;
+        let isMoving = false;
+
+        function handleStart(e, id) {
+            isLongPress = false;
+            isMoving = false;
+            const touch = (e.type === 'touchstart') ? e.touches[0] : e;
+            startY = touch.clientY;
+            startX = touch.clientX;
+            
+            clearTimeout(pressTimer);
+            pressTimer = setTimeout(() => {
+                if (!isMoving) {
+                    isLongPress = true;
+                    closeAllMenus();
+                    const menu = document.getElementById(`menu-${id}`);
+                    if(menu) menu.classList.add('active');
+                }
+            }, 600);
+        }
+
+        function handleMove(e) {
+            const touch = (e.type === 'touchmove') ? e.touches[0] : e;
+            if (Math.abs(touch.clientY - startY) > 15 || Math.abs(touch.clientX - startX) > 15) {
+                isMoving = true;
+                clearTimeout(pressTimer);
+            }
+        }
+
+        function handleEnd(id) {
+            clearTimeout(pressTimer);
+            const menuOpen = document.querySelector('.menu-reading.active');
+            if (!isLongPress && !isMoving && !menuOpen) {
+                // Future Reader Logic goes here
+                console.log("Opening Reader for ID: " + id);
+            }
+        }
+
+        // --- CORE ACTIONS (SILENT) ---
+        function moveToArchive(e, id) {
+            e.stopPropagation();
+            const index = readingBooks.findIndex(b => b.id === id);
+            if (index > -1) {
+                const book = readingBooks.splice(index, 1)[0];
+                archivedBooks.push(book);
+                renderAll();
+            }
+            closeAllMenus();
+        }
+
+        function deleteBook(e, id) {
+            e.stopPropagation();
+            readingBooks = readingBooks.filter(b => b.id !== id);
+            renderAll();
+            closeAllMenus();
+        }
+
+        function showInfo(e, id, img) {
+            e.stopPropagation();
+            const book = readingBooks.find(b => b.id === id);
+            document.getElementById('m-img').src = img;
+            document.getElementById('m-title').innerText = book ? book.title : "Volume " + id;
+            document.getElementById('infoModal').style.display = 'flex';
+            closeAllMenus();
+        }
+
+        function handleDownload(e) {
+            e.stopPropagation();
+            // Silent action
+            closeAllMenus();
+        }
+
+        // --- RENDER LOGIC ---
+        function renderAll() {
+            renderReading();
+            renderArchive();
+        }
+
+        function renderReading() {
+            const grid = document.getElementById('reading-view');
+            grid.innerHTML = '';
+            readingBooks.forEach(book => {
+                grid.innerHTML += `
+                <div class="book-item">
+                    <div class="cover-wrapper" 
+                         onmousedown="handleStart(event, ${book.id})" ontouchstart="handleStart(event, ${book.id})"
+                         onmousemove="handleMove(event)" ontouchmove="handleMove(event)"
+                         onmouseup="handleEnd(${book.id})" ontouchend="handleEnd(${book.id})">
+                        <div class="lib-cover" style="background-image:url('${book.img}')"></div>
+                        <div class="menu-reading" id="menu-${book.id}">
+                            <button class="blind-opt" onclick="handleDownload(event)">Download</button>
+                            <button class="blind-opt" onclick="moveToArchive(event, ${book.id})">Archive</button>
+                            <button class="blind-opt" onclick="deleteBook(event, ${book.id})">Delete</button>
+                            <button class="blind-opt" onclick="showInfo(event, ${book.id}, '${book.img}')">Info</button>
+                            <button class="blind-opt cancel" onclick="closeAllMenus(event)">CANCEL</button>
+                        </div>
+                    </div>
+                    <div class="book-label">${book.title}</div>
+                </div>`;
+            });
+        }
+
+        function renderArchive() {
+            const container = document.getElementById('stack-container');
+            container.innerHTML = '';
+            const colors = ['#4E8BC4', '#FF6DA2', '#2D5A27', '#B31C1C', '#E67E22'];
+            archivedBooks.forEach((book, i) => {
+                container.innerHTML += `<div class="stack-spine" style="background:${colors[i % colors.length]}">${book.title}</div>`;
+            });
+        }
+
+        function showTab(tab, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            ['reading-view', 'archive-view', 'bookmarks-view', 'offline-view'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(tab + '-view').classList.remove('hidden');
+            closeAllMenus();
+        }
+
+        function closeAllMenus(e) {
+            if(e) e.stopPropagation();
+            document.querySelectorAll('.menu-reading').forEach(m => m.classList.remove('active'));
+        }
+
+        renderAll();
+    </script>
+</body>
+</html>

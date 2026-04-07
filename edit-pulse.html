@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PlotPulse - Manage Stories</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pp-blue-light: #C2E1FD;
+            --pp-pink-light: #FFB6D3;
+            --pp-pink-vibrant: #FF6DA2;
+            --pp-blue-dark: #4E8BC4;
+            --nav-grey: #BDBDBD;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Happy Monkey', sans-serif; }
+        
+        body { 
+            background: linear-gradient(180deg, var(--pp-pink-light) 0%, var(--pp-blue-light) 100%); 
+            height: 100vh; display: flex; flex-direction: column; overflow: hidden; 
+        }
+
+        /* --- HEADER --- */
+        #mainHeader {
+            background: var(--pp-pink-light);
+            height: 65px; display: flex; align-items: center;
+            padding: 0 15px; width: 100%; position: fixed; top: 0; left: 0; z-index: 2000;
+        }
+        .brand-logo { height: 100px; width: auto; transform: scale(1.3); transform-origin: left center; }
+
+        /* --- CONTENT AREA --- */
+        .page-content { 
+            flex-grow: 1; 
+            overflow-y: auto; 
+            padding: 85px 15px 100px 15px; 
+            z-index: 1;
+        }
+
+        /* --- TOP MANAGEMENT BOX --- */
+        .management-box {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            padding: 15px; border-radius: 28px; margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 10; /* Ensures buttons are on top */
+        }
+
+        .controls-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; padding: 0 5px; }
+        
+        .btn-back-static { background: transparent; border: none; cursor: pointer; display: flex; align-items: center; padding: 5px; }
+        .btn-back-static img { width: 30px; height: 30px; opacity: 0.8; }
+
+        .btn-create-link {
+            color: white; font-weight: 800; font-size: 0.65rem; text-decoration: none;
+            background: var(--pp-pink-vibrant); padding: 8px 18px; border-radius: 20px;
+            letter-spacing: 0.8px; box-shadow: 0 4px 10px rgba(255, 109, 162, 0.3);
+            display: inline-block;
+        }
+
+        /* --- TABS --- */
+        .tab-container { 
+            display: flex; 
+            background: rgba(255, 255, 255, 0.5); 
+            padding: 4px; border-radius: 20px;
+            position: relative;
+            z-index: 20;
+        }
+        .tab-btn {
+            flex: 1; padding: 12px; border: none; background: transparent;
+            font-weight: 800; color: #666; border-radius: 16px; font-size: 0.85rem;
+            cursor: pointer; transition: 0.3s ease;
+            position: relative;
+            z-index: 30;
+        }
+        .tab-btn.active { background: white; color: var(--pp-pink-vibrant); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+        /* --- UNIFIED GLASS LIST --- */
+        #storyContainerList {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            display: flex; flex-direction: column; overflow: hidden;
+            position: relative;
+            z-index: 5;
+        }
+
+        .story-entry {
+            display: flex; align-items: center; gap: 18px; padding: 22px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3); 
+            position: relative; 
+        }
+        .story-entry:last-child { border-bottom: none; }
+
+        .tap-edit-area {
+            display: flex; align-items: center; gap: 18px; flex-grow: 1;
+            cursor: pointer; -webkit-tap-highlight-color: transparent;
+        }
+
+        /* BIGGER COVER GLASS */
+        .story-thumb-glass {
+            width: 65px; height: 90px; 
+            background: rgba(194, 225, 253, 0.4);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            border: 1.5px solid rgba(255, 255, 255, 0.5);
+            box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.2);
+        }
+
+        .story-info { flex-grow: 1; }
+        .story-title { font-weight: 800; color: #333; font-size: 1rem; display: block; line-height: 1.2; }
+        .story-meta { font-size: 0.7rem; color: #555; font-weight: 600; margin-top: 5px; }
+        
+        /* BURGER MENU ICON */
+        .btn-story-burger { background: transparent; border: none; padding: 10px; cursor: pointer; z-index: 50; }
+        .btn-story-burger img { width: 22px; height: 22px; opacity: 0.6; pointer-events: none; }
+
+        /* OPTIONS DROPDOWN */
+        .story-dropdown-menu {
+            position: absolute; top: 75px; right: 18px;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
+            width: 170px; border-radius: 18px; z-index: 100;
+            display: none; flex-direction: column; padding: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .story-dropdown-menu.active { display: flex; }
+
+        .dropdown-item {
+            padding: 12px 15px; font-size: 0.8rem; color: #444; font-weight: 600;
+            cursor: pointer; border: none; background: transparent; width: 100%;
+            text-align: left; border-radius: 12px;
+        }
+        .dropdown-item:active { background: rgba(194, 225, 253, 0.3); }
+        .dropdown-item.delete { color: #FF4D4D; }
+
+        /* --- BOTTOM NAV --- */
+        .bottom-nav { 
+            position: fixed; bottom: 0; width: 100%; height: 75px;
+            background: #fff; display: flex; justify-content: space-around; 
+            align-items: center; border-radius: 30px 30px 0 0; z-index: 1000; 
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05); padding-bottom: 10px;
+        }
+        .nav-link { text-decoration: none; color: var(--nav-grey); font-size: 0.6rem; display: flex; flex-direction: column; align-items: center; gap: 5px; flex: 1; pointer-events: auto; }
+        .nav-icon { width: 22px; height: 22px; opacity: 0.4; }
+        .nav-link.active { color: var(--pp-pink-vibrant); font-weight: 800; }
+        .nav-link.active .nav-icon { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <header id="mainHeader">
+        <img src="logo2.png" class="brand-logo" alt="PlotPulse">
+    </header>
+
+    <div class="page-content">
+        <div class="management-box">
+            <div class="controls-row">
+                <button class="btn-back-static" onclick="window.location.href='post.html'">
+                    <img src="https://cdn-icons-png.flaticon.com/512/93/93634.png" alt="Back">
+                </button>
+                <a href="newstory.html" class="btn-create-link">CREATE NEW STORY</a>
+            </div>
+
+            <div class="tab-container">
+                <button class="tab-btn active" id="pubTab" onclick="switchTab('published')">Published</button>
+                <button class="tab-btn" id="draftTab" onclick="switchTab('drafts')">Drafts</button>
+            </div>
+        </div>
+        
+        <div id="storyContainerList">
+            </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="landing.html" class="nav-link"><img src="https://cdn-icons-png.flaticon.com/512/19024/19024959.png" class="nav-icon"><span>Home</span></a>
+        <a href="library.html" class="nav-link"><img src="https://cdn-icons-png.flaticon.com/512/1164/1164620.png" class="nav-icon"><span>Library</span></a>
+        <a href="post.html" class="nav-link active"><img src="https://cdn-icons-png.flaticon.com/512/5836/5836915.png" class="nav-icon"><span>Post</span></a>
+        <a href="alert.html" class="nav-link"><img src="https://cdn-icons-png.flaticon.com/512/10156/10156084.png" class="nav-icon"><span>Profile</span></a>
+    </nav>
+
+    <script>
+        const sampleData = {
+            published: [
+                { title: "Notes From Courtside", stats: "84 views • 1 part", date: "April 02" },
+                { title: "Once Was Mine", stats: "16 views • 1 part", date: "March 28" },
+                { title: "The 15-Year Archive", stats: "54 views • 4 parts", date: "March 15" }
+            ],
+            drafts: [
+                { title: "Ruthless Temptation", stats: "6 drafts", date: "Started Today" },
+                { title: "Bad Boy Series 4", stats: "8 drafts", date: "Yesterday" }
+            ]
+        };
+
+        let currentView = 'published';
+
+        function switchTab(view) {
+            currentView = view;
+            document.getElementById('pubTab').classList.toggle('active', view === 'published');
+            document.getElementById('draftTab').classList.toggle('active', view === 'drafts');
+            renderStories();
+        }
+
+        function editStory(title) {
+            window.location.href = 'writer.html?story=' + encodeURIComponent(title);
+        }
+
+        function toggleOptions(e) {
+            e.stopPropagation();
+            const entry = e.target.closest('.story-entry');
+            const menu = entry.querySelector('.story-dropdown-menu');
+            document.querySelectorAll('.story-dropdown-menu.active').forEach(m => { if(m !== menu) m.classList.remove('active'); });
+            menu.classList.toggle('active');
+        }
+
+        function renderStories() {
+            const container = document.getElementById('storyContainerList');
+            const stories = sampleData[currentView];
+            
+            if (!stories || stories.length === 0) {
+                container.innerHTML = `<div style="padding: 20px; text-align: center; color: #888;">No stories yet</div>`;
+                return;
+            }
+
+            container.innerHTML = stories.map((s, i) => `
+                <div class="story-entry">
+                    <div class="tap-edit-area" onclick="editStory('${s.title}')">
+                        <div class="story-thumb-glass"></div>
+                        <div class="story-info">
+                            <span class="story-title">${s.title}</span>
+                            <span class="story-meta">${s.stats} • ${s.date}</span>
+                        </div>
+                    </div>
+                    <button class="btn-story-burger" onclick="toggleOptions(event)">
+                        <img src="https://cdn-icons-png.flaticon.com/512/4254/4254068.png" alt="Menu">
+                    </button>
+                    <div class="story-dropdown-menu">
+                        <button class="dropdown-item">Share</button>
+                        <button class="dropdown-item">View as Reader</button>
+                        <button class="dropdown-item">${currentView === 'drafts' ? 'Publish' : 'Unpublish'}</button>
+                        <button class="dropdown-item delete">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Close dropdowns
+        window.onclick = () => { document.querySelectorAll('.story-dropdown-menu.active').forEach(m => m.classList.remove('active')); };
+        
+        // Load content immediately on script run
+        document.addEventListener('DOMContentLoaded', renderStories);
+        renderStories(); 
+    </script>
+</body>
+</html>

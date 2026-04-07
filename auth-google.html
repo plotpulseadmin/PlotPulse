@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - Google Accounts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Roboto', sans-serif; }
+        
+        body { 
+            background: #fff; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            padding: 20px;
+        }
+
+        .google-card {
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .google-logo { width: 75px; margin-bottom: 20px; }
+        
+        h1 { font-size: 24px; font-weight: 400; margin-bottom: 10px; color: #202124; }
+        
+        .sub-text { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px;
+            color: #202124; 
+            font-size: 16px; 
+            margin-bottom: 30px; 
+        }
+
+        .app-logo-mini { width: 100px; height: auto; }
+        .app-name { font-weight: 500; color: #4E8BC4; }
+
+        .account-list { margin-bottom: 20px; }
+
+        .account-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-top: 1px solid #dadce0;
+            cursor: pointer;
+            text-align: left;
+            transition: background 0.2s;
+        }
+
+        .account-item:hover { background: #f8f9fa; }
+
+        .avatar {
+            width: 35px;
+            height: 35px;
+            background: #4E8BC4;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-weight: 500;
+        }
+
+        .acc-info { flex: 1; }
+        .acc-name { font-size: 14px; font-weight: 500; color: #3c4043; }
+        .acc-email { font-size: 12px; color: #70757a; }
+
+        .use-another {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-top: 1px solid #dadce0;
+            border-bottom: 1px solid #dadce0;
+            cursor: pointer;
+            font-size: 14px;
+            color: #3c4043;
+            font-weight: 500;
+        }
+
+        .footer-note {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #70757a;
+            line-height: 1.6;
+            text-align: left;
+        }
+
+        .footer-note a { color: #1a73e8; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="google-card">
+        <img src="https://www.gstatic.com/images/branding/googlelogo/svg/googlelogo_clr_74x24px.svg" alt="Google" class="google-logo">
+        
+        <h1>Choose an account</h1>
+        
+        <div class="sub-text">
+            to continue to 
+            <img src="logo2.png" alt="PlotPulse" class="app-logo-mini">
+            
+        </div>
+
+        <div class="account-list">
+            <div class="account-item" onclick="selectAccount('Alex Carter', 'alex.pulse@gmail.com')">
+                <div class="avatar">A</div>
+                <div class="acc-info">
+                    <p class="acc-name">Alex Carter</p>
+                    <p class="acc-email">alex.pulse@gmail.com</p>
+                </div>
+            </div>
+
+            <div class="account-item" onclick="selectAccount('Creative Mind', 'writer99@gmail.com')">
+                <div class="avatar" style="background:#FF6DA2;">C</div>
+                <div class="acc-info">
+                    <p class="acc-name">Creative Mind</p>
+                    <p class="acc-email">writer99@gmail.com</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="use-another">
+            <img src="https://cdn-icons-png.flaticon.com/512/10054/10054243.png" style="width:20px; margin-right:12px; opacity:0.6;">
+            Use another account
+        </div>
+
+        <p class="footer-note">
+            To continue, Google will share your name, email address, language preference, and profile picture with PlotPulse. Before using this app, you can review PlotPulse’s <a href="#">privacy policy</a> and <a href="#">terms of service</a>.
+        </p>
+    </div>
+
+    <script>
+        function selectAccount(name, email) {
+            // Short delay to feel like it's processing
+            setTimeout(() => {
+                window.location.href = "landing.html";
+            }, 500);
+        }
+    </script>
+</body>
+</html>

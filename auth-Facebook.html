@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in with Facebook - PlotPulse</title>
+    <style>
+        :root {
+            --fb-blue: #1877F2;
+            --fb-bg: #F0F2F5;
+            --fb-text: #1C1E21;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Helvetica, Arial, sans-serif; }
+        
+        body { 
+            background: var(--fb-bg); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            padding: 20px;
+        }
+
+        .facebook-card {
+            width: 100%;
+            max-width: 450px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        /* --- Header --- */
+        .fb-header {
+            background: var(--fb-blue);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .fb-logo-text { font-weight: bold; font-size: 20px; letter-spacing: -1px; }
+        .cancel-link { color: white; text-decoration: none; font-size: 14px; opacity: 0.9; }
+
+        /* --- Content --- */
+        .fb-content {
+            padding: 40px 30px 20px;
+            text-align: center;
+        }
+
+        .handshake-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        /* CSS-ONLY FB LOGO (Won't break) */
+        .fb-circle {
+            width: 65px;
+            height: 65px;
+            background: var(--fb-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 50px;
+            font-weight: bold;
+            font-family: sans-serif;
+            text-indent: 10px;
+            padding-top: 10px;
+        }
+
+        .circle-logo-img {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            object-fit: contain;
+            border: 1px solid #ddd;
+            background: white;
+        }
+
+        .arrow-icon { font-size: 24px; color: #ccc; font-weight: 100; }
+
+        h1 { font-size: 22px; font-weight: 600; color: var(--fb-text); margin-bottom: 10px; }
+        .desc-text { color: #606770; font-size: 15px; line-height: 1.4; margin-bottom: 25px; }
+        .app-name { color: #4E8BC4; font-weight: 600; }
+
+        /* Permissions */
+        .permission-box {
+            text-align: left;
+            background: #f5f6f7;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #dddfe2;
+        }
+        .perm-header { font-size: 13px; font-weight: 600; color: #4b4f56; margin-bottom: 5px; display: block; }
+        .perm-body { color: #606770; font-size: 13px; line-height: 1.4; }
+
+        /* --- Footer --- */
+        .fb-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #dddfe2;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #fff;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-cancel { background: #e4e6eb; color: #4b4f56; }
+        .btn-continue { background: var(--fb-blue); color: white; }
+    </style>
+</head>
+<body>
+
+    <div class="facebook-card">
+        <div class="fb-header">
+            <div class="fb-logo-text">facebook</div>
+            <a href="login.html" class="cancel-link">Cancel</a>
+        </div>
+        
+        <div class="fb-content">
+            <div class="handshake-wrapper">
+                <div class="fb-circle">f</div>
+                
+                <div class="arrow-icon">›</div>
+                
+                <img src="logo2.png" class="circle-logo-img" alt="PP">
+            </div>
+
+            <h1>Log in with Facebook</h1>
+            <p class="desc-text">
+                <span class="app-name">PlotPulse</span> is requesting access to your name, profile picture, and email address.
+            </p>
+
+            <div class="permission-box">
+                <span class="perm-header">This app will receive:</span>
+                <p class="perm-body">Your public profile and email address. This doesn't let the app post to Facebook.</p>
+            </div>
+        </div>
+
+        <div class="fb-footer">
+            <a href="login.html" class="btn btn-cancel">Cancel</a>
+            <button class="btn btn-continue" onclick="loginFB()">Log in as Alex</button>
+        </div>
+    </div>
+
+    <script>
+        function loginFB() {
+            window.location.href = "landing.html";
+        }
+    </script>
+</body>
+</html>

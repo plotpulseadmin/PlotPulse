@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlotPulse - Sign Up</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --blue: #4E8BC4; 
+            --bg: linear-gradient(180deg, #FF99BE 0%, #C2E1FD 100%); 
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body { 
+            background: var(--bg); 
+            background-attachment: fixed;
+            /* Allow the page to scroll naturally */
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* This wrapper ensures content is centered but remains scrollable */
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 40px 20px; /* Space for the keyboard */
+        }
+        
+        #loading-overlay { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: #fff; 
+            z-index: 9999; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+        }
+        
+        .loading-logo { 
+            width: 200px; 
+            animation: pulse-animation 1.5s ease-in-out infinite; 
+        }
+        
+        @keyframes pulse-animation { 
+            0% { transform: scale(0.95); opacity: 0.7; } 
+            50% { transform: scale(1.05); opacity: 1; } 
+            100% { transform: scale(0.95); opacity: 0.7; } 
+        }
+
+        .logo-img { 
+            width: 220px; 
+            margin-top: auto; /* Pushes content down to center it */
+            margin-bottom: 20px; 
+            flex-shrink: 0; 
+        }
+        
+        .form-container { 
+            width: 100%; 
+            max-width: 320px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            align-items: center;
+            margin-bottom: auto; /* Works with logo margin-top to center the form */
+        }
+
+        .input-wrapper { width: 100%; position: relative; }
+        
+        input { 
+            width: 100%; 
+            padding: 12px 25px; 
+            border-radius: 30px; 
+            border: 1px solid rgba(255,255,255,0.7); 
+            background: rgba(255,255,255,0.5); 
+            font-size: 16px; /* 16px prevents iOS from auto-zooming on inputs */
+            outline: none; 
+            text-align: center; 
+        }
+
+        .eye-toggle { 
+            position: absolute; 
+            right: 18px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            width: 20px; 
+            cursor: pointer; 
+            opacity: 0.6; 
+        }
+
+        .create-btn { 
+            width: 100%; 
+            background: var(--blue); 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            border-radius: 30px; 
+            font-weight: 800; 
+            cursor: pointer; 
+            margin-top: 5px; 
+        }
+        
+        .login-link { margin-top: 15px; font-size: 0.8rem; color: var(--blue); font-weight: 600; }
+        .login-link a { font-weight: 800; text-decoration: none; color: var(--blue); }
+        
+        .hidden { opacity: 0; pointer-events: none; }
+        .error-msg { color: #FF4D4D; font-size: 0.7rem; font-weight: 600; display: none; margin-top: -5px; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <img src="logo3.png" alt="Pulsing Loader" class="loading-logo">
+        <p style="margin-top:25px; font-weight:800; color:var(--blue); letter-spacing:1px; font-size: 0.8rem;">Feeling the pulse...</p>
+    </div>
+    
+    <div class="page-wrapper">
+        <img src="logo.png" alt="PlotPulse" class="logo-img">
+        
+        <div class="form-container">
+            <input type="text" class="field" placeholder="Username" oninput="checkTyping()">
+            <input type="text" class="field" placeholder="Full Name" oninput="checkTyping()">
+            <input type="email" class="field" placeholder="Email Address" oninput="checkTyping()">
+            
+            <div class="input-wrapper">
+                <input type="password" id="pass" class="field" placeholder="Create Password" oninput="checkTyping()">
+                <div class="eye-toggle" onclick="togglePass('pass', 'eye-c1', 'eye-o1')">
+                    <svg id="eye-c1" viewBox="0 0 24 24" fill="none" stroke="#4E8BC4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    <svg id="eye-o1" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="#4E8BC4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <input type="password" id="confirm" class="field" placeholder="Re-type Password" oninput="checkTyping()">
+                <div class="eye-toggle" onclick="togglePass('confirm', 'eye-c2', 'eye-o2')">
+                    <svg id="eye-c2" viewBox="0 0 24 24" fill="none" stroke="#4E8BC4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                    <svg id="eye-o2" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="#4E8BC4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </div>
+            </div>
+            
+            <p id="error-match" class="error-msg">Passwords do not match!</p>
+            <p id="error-match" class="error-msg">Username already taken!</p>
+            
+            <button class="create-btn" onclick="submitForm()">Create Account</button>
+            <p id="login-nav" class="login-link">Already a member? <a href="login.html">Log In</a></p>
+        </div>
+    </div>
+
+    <script>
+        function togglePass(inputId, closedId, openId) {
+            const p = document.getElementById(inputId);
+            const closed = document.getElementById(closedId);
+            const open = document.getElementById(openId);
+            if (p.type === 'password') {
+                p.type = 'text';
+                closed.style.display = 'none';
+                open.style.display = 'block';
+            } else {
+                p.type = 'password';
+                closed.style.display = 'block';
+                open.style.display = 'none';
+            }
+        }
+
+        function checkTyping() {
+            const fields = document.querySelectorAll('.field');
+            const nav = document.getElementById('login-nav');
+            let hasText = Array.from(fields).some(f => f.value.length > 0);
+            hasText ? nav.classList.add('hidden') : nav.classList.remove('hidden');
+        }
+
+        function submitForm() {
+            const p1 = document.getElementById('pass').value;
+            const p2 = document.getElementById('confirm').value;
+            const errorMatch = document.getElementById('error-match');
+
+            if (p1 !== p2) {
+                errorMatch.style.display = 'block';
+                return;
+            }
+            errorMatch.style.display = 'none';
+            document.getElementById('loading-overlay').style.display = 'flex';
+            setTimeout(() => { window.location.href = "login.html"; }, 2500); 
+        }
+    </script>
+</body>
+</html>

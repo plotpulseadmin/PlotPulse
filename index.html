@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlotPulse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --blue: #4E8BC4; 
+            --bg: linear-gradient(180deg, #FF99BE 0%, #C2E1FD 100%); 
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        
+        body {
+            background: var(--bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Using your branded logo3.png as the pulsing center */
+        .loading-logo {
+            width: 220px;
+            animation: pulse-animation 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+
+        .tagline {
+            margin-top: 25px;
+            color: var(--blue);
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <img src="logo.png" alt="PlotPulse" class="loading-logo">
+    <p class="tagline">Feeling the pulse...</p>
+
+    <script>
+        // Automatic redirect to your login page after the pulse
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 3000); // 3 seconds is perfect for a brand introduction
+    </script>
+</body>
+</html>
